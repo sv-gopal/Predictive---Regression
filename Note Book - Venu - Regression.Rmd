@@ -1,0 +1,87 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r Regression - UCI - ASN - DS}
+# UCI Data sets: Airfoil Self Noise Data Set
+# Importing the data Set into R
+ASN <- read.csv(file = "C:/Venu/UCI DataSets/Airfoil Self Noise.csv", header = TRUE,stringsAsFactors = FALSE)
+# Exploring the data using summary statistics
+summary(ASN)
+# Scatter Plot: Exploring relationships among the variables
+plot(ASN)
+# Correlation Analysis: Exploring linear relationships among variables using Pearson's correlation coerfficient
+cor(ASN)
+attach(ASN)
+# Distribution of the variables using histogram
+
+colnames <- dimnames(ASN)[[2]]
+par(mfrow = c(3,3))
+for (i in 1:6)
+  {
+    
+    hist(ASN[,i],main = colnames[i],col = "gray",border = "white")
+  }
+# Box Plots
+par(mfrow = c(3,3))
+for (i in 1:6) {
+  boxplot(ASN[,i], horizontal = TRUE, main = colnames[i])
+}
+
+# Multiple Linear Regression: SSP noise level as dependent and all others as independent variables
+ASN.Reg <- lm(SSP.Level~.,data = ASN)
+
+# Results of the regression analysis
+summary(ASN.Reg)
+ASN.Reg$coefficients
+
+par(mfrow=c(1,1))
+# Histogram of residuals
+hist(ASN.Reg$residuals,xlab = "Residuals", main = "Histogram of Residuals")
+# Distribution of fitted value s
+hist(ASN.Reg$fitted.values, xlab = "Fitted Values", main = "Histogram of Fitted Values")
+
+# Validating Assumptions of Regression Analysis; Normality, Heteroscadasticity, Multicollinearity
+par(mfrow=c(2,2))
+plot(ASN.Reg)
+library(car)
+vif(ASN.Reg)
+# Contructing the confidence intervals for the Regression parameters
+confint(ASN.Reg)
+# Construction of confidence and prediction intervals for the mean value of dependent variable
+predict (ASN.Reg ,data.frame(Frequency=800,Angle.of.Attack=5.4,Chord.Length=0.1016,FS.Velocity=39.6,SSD.Thickness=0.0049),interval = "confidence")
+
+# Construction of prediction interval for a randomly chosen value of the dependent variable
+predict (ASN.Reg ,data.frame(Frequency=800,Angle.of.Attack=5.4,Chord.Length=0.1016,FS.Velocity=39.6,SSD.Thickness=0.0049),interval = "prediction")
+
+
+# Regression analysis using interaction of variables
+ASN.R1 <- lm(SSP.Level~Frequency+Chord.Length+SSD.Thickness+Frequency:SSD.Thickness, data = ASN)
+summary(ASN.R1)
+
+# Regression analysis using quadratic functions
+ASN.R2 <- lm(SSP.Level~Frequency+I(Frequency^2),data = ASN)
+summary(ASN.R2)
+ASN.R3 <- lm(SSP.Level~Chord.Length+I(Chord.Length^2),data = ASN)
+summary(ASN.R3)
+ASN.R4 <- lm(SSP.Level~SSD.Thickness+I(SSD.Thickness^2),data = ASN)
+summary(ASN.R4)
+
+# Regression analysis using higher order polynomials functions (Non-linear functions)
+ASN.R5 <- lm(SSP.Level~poly(Frequency,5),data = ASN)
+summary(ASN.R5)
+ASN.R6 <- lm(SSP.Level~poly(Chord.Length,5),data = ASN)
+summary(ASN.R6)
+ASN.R7 <- lm(SSP.Level~log(Frequency),data = ASN)
+summary(ASN.R7)
+```
